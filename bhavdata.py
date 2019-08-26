@@ -24,9 +24,9 @@ class BhavData(object):
         self.parse()
 
     def parse(self):
-        if data.content is None:
+        if self.content is None:
             return
-        content = data.content.split("\n")
+        content = self.content.split("\n")
         header = content[0].split(",")
         content = content[1:]
         parsed = []
