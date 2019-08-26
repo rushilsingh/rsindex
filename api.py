@@ -1,18 +1,30 @@
-start = "01-08-2019"
-end = "30-08-2019"
-API = "https://www.nseindia.com/products/dynaContent/common/productsSymbolMapping.jsp?symbol=AB&segmentLink=3&symbolCount=2&series=ALL&dateRange=+&fromDate=01-08-2019&toDate=30-08-2019&dataType=PRICEVOLUMEDELIVERABLE"
+import os
+import requests
+import io
+import zipfile
 
 
-def download(api):
-    import requests
-    response = requests.get(api)
-    content = response.text if response.status_code == 200 else None
-    if content is not None:
-        with open("data.html", "w") as f:
-            f.write(content)
+API = "https://www.nseindia.com/products/content/sec_bhavdata_full.csv"
+
+class BhavData(object):
+
+    def __init__(self):
+        self.url = API
+        self.response = None
+        self.content = None
+    def download(self):
+
+        while(self.response is None or self.response.status_code != 200):
+            self.response = requests.get(self.url, stream=True)
+            content = self.response.content if self.response.status_code == 200 else None
+            if content is not None:
+                if self.content is None or content != self.content:
+                    self.content = content
 
 
+        
 
 
 if __name__ == '__main__':
-    download(API) 
+    data = BhavData()
+    data.download()

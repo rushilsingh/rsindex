@@ -34,7 +34,7 @@ SECRET_KEY = 'z8(p&&8q&wi)a556m_c+&kttkzq!oww-1$@lolmpv&8t$j7z&b'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['rsindex.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rsindexapp'
 ]
 
 MIDDLEWARE = [
