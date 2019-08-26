@@ -3,7 +3,8 @@ from bhavdata import BhavData
 # Create your views here.
 
 DATA = BhavData()
-DATA.download()
+DATA.parse()
+DATA = DATA.content
 
 def index(request):
-    return render(request, "base.html", {"data":DATA.content})
+    return render(request, "base.html", {"data":DATA})
