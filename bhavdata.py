@@ -11,8 +11,31 @@ class BhavData(object):
     def __init__(self):
         self.content = None
         self.api = "01-01-2018-TO-31-12-2018%sALLN.csv"
-        self.universe = ["20MICRONS"]
+        self.full_file_api = API
+        self.load_universe()
+        self.universe = ["20MICRONS"] #arbitrarily chosen
+
+    def load_universe(self):
+        response = requests.get(self.full_file_api)
+        if response.code == 200:
+            text = response.text
+            lines = text.split("/n")
+            lines = lines[1:]
+            symbols = []
+            for line in lines:
+                symbol = line.split(",")
+                if symbol not in line and len(symbols)<10:
+                    symbols.append(symbol)
+                if len(symbols) >= 10:
+                    break
+            self.universe = symbols
+        else:
+            self.load_universe()
+
+    
     def extract(self):
+
+        self.load_universe()
         data = {}
         for stock in self.universe:
             fname = self.api % stock
@@ -46,28 +69,6 @@ class BhavData(object):
                         parsed.append(record)
             
             data[stock.strip("'").strip('"')] = parsed
-        self.content = data
-    
-    #TODO: Modify and use below code if db required
-    """
-    def insert(self):
-        red = redis.from_url(os.environ.get('REDIS_URL'), decode_responses=True)
-        #red = redis.Redis()
-        red.flushdb()
-        pipe = red.pipeline()
-        n = 0
-        for record in self.content:
-            symbol = record["SYMBOL"]
-            symbol = "\"" + symbol + "\"" if " " in symbol else symbol
-            import json
-            red.hset("SYMBOLS", symbol, json.dumps(record))
-            n += 1
-            if (n % 64) == 0:
-                pipe.execute()
-                pipe = red.pipeline()
-        pipe.execute()
-        self.loaded = True
-    """
 
 if __name__ == '__main__':
     import requests
