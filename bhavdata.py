@@ -17,18 +17,21 @@ class BhavData(object):
 
     def load_universe(self):
         response = requests.get(self.full_file_api)
-        if response.code == 200:
+        if response.status_code == 200:
             text = response.text
-            lines = text.split("/n")
+            lines = text.split("\n")
             lines = lines[1:]
             symbols = []
             for line in lines:
-                symbol = line.split(",")
-                if symbol not in line and len(symbols)<10:
-                    symbols.append(symbol)
-                if len(symbols) >= 10:
-                    break
+                parts = line.split(",")
+                if len(parts) > 1: 
+                    symbol = parts[0]
+                    if symbol not in symbols and len(symbols)<10:
+                        symbols.append(symbol)
+                    if len(symbols) >= 10:
+                        break
             self.universe = symbols
+            print(self.universe)
         else:
             self.load_universe()
 
@@ -36,6 +39,7 @@ class BhavData(object):
     def extract(self):
 
         self.load_universe()
+        """
         data = {}
         for stock in self.universe:
             fname = self.api % stock
@@ -43,9 +47,11 @@ class BhavData(object):
                 content = f.read()
             data[stock] = content
         self.content = data
+        """
 
     #TODO: Modify below methods to implement Relative Strength Strategy 
 
+    """
     def parse(self):
         self.extract()
         if self.content is None:
@@ -69,11 +75,12 @@ class BhavData(object):
                         parsed.append(record)
             
             data[stock.strip("'").strip('"')] = parsed
-
+    """
 if __name__ == '__main__':
-    import requests
-    text = requests.get(API).text
-    with open(API.split("/")[-1], "w") as f:
-        f.write(text)
+    #import requests
+    #text = requests.get(API).text
+    #with open(API.split("/")[-1], "w") as f:
+    #    f.write(text)
     bhavdata = BhavData()
-    bhavdata.parse()
+    bhavdata.extract()
+    #bhavdata.parse()
