@@ -70,5 +70,9 @@ class BhavData(object):
     """
 
 if __name__ == '__main__':
+    import requests
+    text = requests.get(API).text
+    with open(API.split("/")[-1], "w") as f:
+        f.write(text)
     bhavdata = BhavData()
     bhavdata.parse()
