@@ -15,38 +15,8 @@ class BhavData(object):
         self.universe = ['20MICRONS', '21STCENMGM', '3IINFOTECH', '3MINDIA',
                          '3PLAND', '5PAISA', '63MOONS', '8KMILES', 'A2ZINFRA', 'AARON']
 
-    def load_universe(self):
-        with open("universe") as f:
-            text = f.read()
-            list = text.split(",")
-
-
     def extract(self):
-
-        self.load_universe()
-        data = {}
-        for stock in self.universe:
-            fname = self.api % stock
-            try:
-                with open("stocks/%s" % fname) as f:
-                    lines = f.readlines()
-                    new_lines = []
-                    for line in lines:
-                        value = line.split(",")[0]
-                        value = value.strip('"')
-                        print(value)
-                        print(stock)
-                        if value == "Symbol" or value == stock:
-                            new_lines.append(line)
-                            print(new_lines)
-                
-                    if new_lines != lines:
-                        with open("stocks/%s" % fname, "w") as f:
-                            f.writelines(new_lines)
-                    
-                data[stock] = content
-            except Exception as e:
-                pass
+        pass
 
 if __name__ == '__main__':
     bhavdata = BhavData()
