@@ -2,85 +2,53 @@ import os
 import requests
 import io
 import zipfile
-import redis
 
-API = "https://www.nseindia.com/products/content/sec_bhavdata_full.csv"
 
 class BhavData(object):
 
     def __init__(self):
         self.content = None
         self.api = "01-01-2018-TO-31-12-2018%sALLN.csv"
-        self.full_file_api = API
         self.load_universe()
-        self.universe = ["20MICRONS"] #arbitrarily chosen
+
+        # chosen by iterating through data in full file and choosing first 10 stocks that have non-empty data for the year 2018
+        self.universe = ['20MICRONS', '21STCENMGM', '3IINFOTECH', '3MINDIA',
+                         '3PLAND', '5PAISA', '63MOONS', '8KMILES', 'A2ZINFRA', 'AARON']
 
     def load_universe(self):
-        response = requests.get(self.full_file_api)
-        if response.status_code == 200:
-            text = response.text
-            lines = text.split("\n")
-            lines = lines[1:]
-            symbols = []
-            for line in lines:
-                parts = line.split(",")
-                if len(parts) > 1: 
-                    symbol = parts[0]
-                    if symbol not in symbols and len(symbols)<10:
-                        symbols.append(symbol)
-                    if len(symbols) >= 10:
-                        break
-            self.universe = symbols
-            print(self.universe)
-        else:
-            self.load_universe()
+        with open("universe") as f:
+            text = f.read()
+            list = text.split(",")
 
-    
+
     def extract(self):
 
         self.load_universe()
-        """
         data = {}
         for stock in self.universe:
             fname = self.api % stock
-            with open("stocks/%s" % fname) as f:
-                content = f.read()
-            data[stock] = content
-        self.content = data
-        """
+            try:
+                with open("stocks/%s" % fname) as f:
+                    lines = f.readlines()
+                    new_lines = []
+                    for line in lines:
+                        value = line.split(",")[0]
+                        value = value.strip('"')
+                        print(value)
+                        print(stock)
+                        if value == "Symbol" or value == stock:
+                            new_lines.append(line)
+                            print(new_lines)
+                
+                    if new_lines != lines:
+                        with open("stocks/%s" % fname, "w") as f:
+                            f.writelines(new_lines)
+                    
+                data[stock] = content
+            except Exception as e:
+                pass
 
-    #TODO: Modify below methods to implement Relative Strength Strategy 
-
-    """
-    def parse(self):
-        self.extract()
-        if self.content is None:
-            return
-        data = {}
-        for stock in self.content:
-            content = self.content[stock]
-            content = content.split("\n")
-            header = content[0].split(",")
-            header = [i.strip('"').strip("'") for i in header]
-            date_index = header.index("Date")
-            content = content[1:]
-            parsed = []
-            for line in content:
-                    values = line.split(",")
-                    if len(values) == len(header):
-                        values = [i.strip('"').strip("'") for i in values]
-                        date = values[date_index]
-                        record = dict(zip(header, values))
-                        record = {date: record}
-                        parsed.append(record)
-            
-            data[stock.strip("'").strip('"')] = parsed
-    """
 if __name__ == '__main__':
-    #import requests
-    #text = requests.get(API).text
-    #with open(API.split("/")[-1], "w") as f:
-    #    f.write(text)
     bhavdata = BhavData()
     bhavdata.extract()
-    #bhavdata.parse()
+    # bhavdata.parse()
