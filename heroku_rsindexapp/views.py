@@ -6,5 +6,6 @@ DATA = BhavData()
 DATA.parse()
 DATA = DATA.content
 
+
 def index(request):
-    return render(request, "base.html", {"data":DATA})
+    return render(request, "base.html", {"data": DATA})

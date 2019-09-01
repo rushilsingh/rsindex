@@ -14,7 +14,7 @@ clean_data = {}
 for stock in data:
     content = data[stock]
     lines = content.split("\n")
-    lines = lines[1:] # throw away header
+    lines = lines[1:]  # throw away header
     cleaned = {}
     clean_data[stock] = cleaned
     for line in lines:
@@ -24,9 +24,9 @@ for stock in data:
             price = line[price_index]
             date = date.strip('"')
             price = price.strip('"').strip()
+            price = float(price)
             cleaned[date] = price
         clean_data[stock] = cleaned
 
 with open("clean_data.json", "w") as f:
     f.write(json.dumps(clean_data))
-

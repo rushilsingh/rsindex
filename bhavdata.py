@@ -30,7 +30,8 @@ class BhavData(object):
                 import json
                 f.write(json.dumps(self.content))
             print(data)
-            
+
+
 if __name__ == '__main__':
     bhavdata = BhavData()
     bhavdata.extract()
