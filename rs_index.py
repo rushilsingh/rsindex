@@ -1,22 +1,7 @@
 import pickle
 from collections import OrderedDict
 
-"""
-Prospective constants:
-STARTING_CAPITAL = 1000
-INVESTED_CAPITAL = 0
-"""
-
-PERIODS = 14  # Conventional value for periods in relative strength stategy
-
-"""
-ROUGHLY:
-PURCHASE_AMOUNT = PRICE * UNITS
-INVESTED_CAPITAL += PURCHASE_AMOUNT
-STARTING_CAPITAL -= PURCHASE_AMOUNT
-TRADE is some buy/sell operation
-... and so on. something like this.
-"""
+FIRST_CYCLE = 14  # Conventional value for periods in relative strength stategy before moving to smoothing
 
 
 class RSI(object):
@@ -32,18 +17,20 @@ class RSI(object):
 
     def compute(self):
         rs_values = {}
+
         for stock, data in self.obj.items():
 
-            profit = 0
-            loss = 0
+            cumulative_profit = 0
+            cumulative_loss = 0
+
             base_date = None
             previous_price = None
+
             timedelta = 0
             periods = 0  # We want periods not just days as denoted by timedelta
 
-            goal_periods = 14  # DECLARING CONSTANT
+            goal_periods = FIRST_CYCLE
 
-            end_reached = False  # What if fewer than goal_periods periods?
             for date, price in data.items():
                 periods += 1
                 if base_date is None:
@@ -52,45 +39,55 @@ class RSI(object):
                 else:
                     timedelta = date - base_date
                     timedelta = timedelta.days
+
+                    base_date = date
                     pricedelta = float(price - previous_price) / \
                         previous_price * float(100.0)  # as percentage
 
-                    # shorter timedelta for same gain or loss indicates higher intensity of change
+                    # we divide by timedelta below because shorter timedelta for same gain or loss indicates higher intensity of change
                     pricedelta = pricedelta/float(timedelta)
 
                     profit_made = False
-                    if pricedelta >= 0.0:
-                        profit_made = True
-                        profit += pricedelta
-                    else:
-                        pricedelta = abs(pricedelta)
-                        loss += pricedelta
-                    if end_reached:
-                        profit = 0
-                        loss = 0
-                        if profit_made:
-                            profit = pricedelta
-                        else:
-                            loss = pricedelta
+
+                    if pricedelta >= 0.0:  # profit
+                        current_profit = pricedelta
+                        cumulative_profit += current_profit
+                    else:  # loss
+                        current_loss = abs(pricedelta)
+                        cumulative_loss += current_loss
+
+                    if (periods-1) >= goal_periods:  # We hit smoothing trigger last cycle
                         quotient_numerator = (
-                            average_gain*(goal_periods-1)) + profit
+                            average_gain*(goal_periods-1)) + current_profit
                         quotient_denominator = (
-                            average_loss*(goal_periods-1)) + loss
-                        if quotient_numerator <= 0.000000000:
+                            average_loss*(goal_periods-1)) + current_loss
+
+                        # Need to update cumulatives and averages to reflect current date data
+                        cumulative_profit += current_profit
+                        cumulative_loss += current_loss
+
+                        average_gain = cumulative_profit/float(periods)
+                        average_loss = cumulative_loss/float(periods)
+
+                        if quotient_numerator <= 0.0000000000:  # Limit for minima
                             rs = 0.0
-                        elif quotient_denominator <= 0.0000000:
+                        elif quotient_denominator <= 0.0000000000:  # Limit for maxima
                             rs = 100.0
                         else:
                             quotient = quotient_numerator/quotient_denominator
                             main_denominator = 1+quotient
                             rs = 100 - (100/main_denominator)
+
                         self.rs_values[stock][date] = rs
-                    elif periods >= goal_periods:
-                        average_gain = profit/float(goal_periods)
-                        average_loss = loss/float(goal_periods)
-                        if average_gain <= 0.00000000:
+
+                    elif periods >= goal_periods:  # Do some computations and move to smoothing from next iteration of for loop
+
+                        average_gain = cumulative_profit/float(goal_periods)
+                        average_loss = cumulative_loss/float(goal_periods)
+
+                        if average_gain <= 0.0000000000:
                             rs = 0.0
-                        elif average_loss <= 0.000000000:
+                        elif average_loss <= 0.000000000000:
                             rs = 100.0
                         else:
                             quotient = average_gain/average_loss
@@ -98,17 +95,12 @@ class RSI(object):
                             rs = float(100)/denominator
                         values = OrderedDict()
                         values[date] = rs
-
-                        end_reached = True  # goal periods reached. move on to smoothing
                         self.rs_values[stock] = values
 
-            if not end_reached:
+            if periods < goal_periods:
                 raise Exception("Insufficient data for meaningful analysis")
 
         return self.rs_values
-
-    def smoothen(self, stock, date, price, average_gain, average_loss):
-        pass
 
 
 if __name__ == '__main__':
@@ -119,6 +111,7 @@ if __name__ == '__main__':
         mappings = data[stock]
         for date in mappings:
             rs = mappings[date]
+            print(rs)
             lines.append("%s, %s, %s" % (stock, date, rs))
     csv_data = "\n".join(lines)
 
