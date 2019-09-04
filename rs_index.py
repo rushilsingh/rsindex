@@ -114,8 +114,15 @@ class RSI(object):
 if __name__ == '__main__':
     rsi = RSI()
     data = rsi.compute()
+    lines = ["STOCK", "DATA", "RSI"]
     for stock in data:
         mappings = data[stock]
         for date in mappings:
             rs = mappings[date]
-            print("Stock: %s  Date: %s  Relative Strength: %s" % (stock, date, rs)) 
+            lines.append("%s, %s, %s" % (stock, date, rs))
+    csv_data = "\n".join(lines)
+
+    with open("rsi_data.csv", "w") as f:
+        f.write(csv_data)
+    with open("rsi_data.obj", "wb") as f:
+        f.write(pickle.dumps(data))
