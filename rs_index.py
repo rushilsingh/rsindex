@@ -111,7 +111,6 @@ if __name__ == '__main__':
         mappings = data[stock]
         for date in mappings:
             rs = mappings[date]
-            print(rs)
             lines.append("%s, %s, %s" % (stock, date, rs))
     csv_data = "\n".join(lines)
 

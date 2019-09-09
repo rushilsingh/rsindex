@@ -17,4 +17,13 @@ import pickle
 
 with open("rsi_data.obj", "rb") as f:
     obj = pickle.load(f)
-print(obj)
+
+for stock in obj:
+    mappings = obj[stock]
+    lines = ["STOCK", "DATA", "RSI"]
+    for date in mappings:
+        rs = mappings[date]
+        lines.append("%s, %s, %s" % (stock, date, rs))
+    csv_data = "\n".join(lines)
+
+print(csv_data)
