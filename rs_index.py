@@ -16,7 +16,6 @@ class RSI(object):
             return obj
 
     def compute(self):
-        rs_values = {}
 
         for stock, data in self.obj.items():
 
@@ -46,8 +45,6 @@ class RSI(object):
 
                     # we divide by timedelta below because shorter timedelta for same gain or loss indicates higher intensity of change
                     pricedelta = pricedelta/float(timedelta)
-
-                    profit_made = False
 
                     if pricedelta >= 0.0:  # profit
                         current_profit = pricedelta
