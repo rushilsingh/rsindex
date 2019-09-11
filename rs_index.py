@@ -7,9 +7,10 @@ FIRST_CYCLE = 14  # Conventional value for periods in relative strength stategy 
 class RSI(object):
 
     def __init__(self, obj_file="ordered.obj"):
-        self.obj = self.load()
-        self.rs_values = {}
         self.obj_file = obj_file
+        self.obj = None
+        self.data = {}
+
     def load(self):
         with open(self.obj_file, "rb") as f:
             obj = pickle.load(f)
@@ -97,12 +98,14 @@ class RSI(object):
             if periods < goal_periods:
                 raise Exception("Insufficient data for meaningful analysis")
 
-        return self.rs_values
+        self.data = self.rs_values
 
 
 if __name__ == '__main__':
     rsi = RSI()
-    data = rsi.compute()
+    rsi.load()
+    rsi.compute()
+    data = rsi.data
     lines = ["STOCK", "DATA", "RSI"]
     for stock in data:
         mappings = data[stock]
