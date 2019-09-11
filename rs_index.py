@@ -6,12 +6,12 @@ FIRST_CYCLE = 14  # Conventional value for periods in relative strength stategy 
 
 class RSI(object):
 
-    def __init__(self):
+    def __init__(self, obj_file="ordered.obj"):
         self.obj = self.load()
         self.rs_values = {}
-
+        self.obj_file = obj_file
     def load(self):
-        with open("ordered.obj", "rb") as f:
+        with open(self.obj_file, "rb") as f:
             obj = pickle.load(f)
             return obj
 

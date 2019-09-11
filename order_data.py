@@ -17,7 +17,7 @@ unordered_dict = parsed
 ordered_dict = OrderedDict()
 for key, value in sorted(unordered_dict.items(), key=lambda t: t[0]):
     inner_ordered_dict = OrderedDict()
-    if type(value) is dict:
+    if isinstance(value, dict):
         inner_unordered_dict = value
         for inner_key, inner_value in sorted(inner_unordered_dict.items(), key=lambda x: x[0]):
             inner_ordered_dict[inner_key] = inner_value
