@@ -9,12 +9,13 @@ class RSI(object):
     def __init__(self, obj_file="ordered.obj"):
         self.obj_file = obj_file
         self.obj = None
+        self.rs_values = {}
         self.data = {}
 
     def load(self):
         with open(self.obj_file, "rb") as f:
             obj = pickle.load(f)
-            return obj
+        self.obj = obj
 
     def compute(self):
 
@@ -98,14 +99,13 @@ class RSI(object):
             if periods < goal_periods:
                 raise Exception("Insufficient data for meaningful analysis")
 
-        self.data = self.rs_values
 
 
 if __name__ == '__main__':
     rsi = RSI()
     rsi.load()
     rsi.compute()
-    data = rsi.data
+    data = rsi.rs_values
     lines = ["STOCK", "DATA", "RSI"]
     for stock in data:
         mappings = data[stock]
